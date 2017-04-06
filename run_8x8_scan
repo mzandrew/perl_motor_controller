@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+
+# started 2010-04-15 by mza @ uh idlab
+
+use strict;
+use motor_controller;
+use debug_info_warning_error;
+
+my ($x, $y) = (0, 0);
+my ($old_x, $old_y) = (0, 0);
+my ($delta_x, $delta_y) = (0, 0);
+
+my $should_actually_move_motor = 1;
+#$should_actually_move_motor = 0;
+
+sub wait_for_keypress {
+	info("");
+	info("press enter to move to next position.");
+	info("type \"q\" then press enter to quit scan and return motor slides to original positions.");
+	my $line = <STDIN>;
+	chomp($line);
+	die if ($line =~ /q/);
+}
+
+wait_for_keypress();
+if ($should_actually_move_motor) {
+	get_all_original_motor_positions();
+	move_xy_slide_to_granular_relative_position(0, -7);
+}
+for (my $y_prime=0; $y_prime<4; $y_prime++) {
+	for (my $x_prime=0; $x_prime<16; $x_prime++) {
+		if ($x_prime<8) {
+			$x = $x_prime;
+			$y = 2 * $y_prime;
+		} else {
+			$x = 15 - $x_prime;
+			$y = 2 * $y_prime + 1;
+		}
+		$delta_x = $x - $old_x;
+		$delta_y = $y - $old_y;
+		info("moving to abs[$x, $y] -> rel($delta_x, $delta_y)");
+		wait_for_keypress();
+		if ($should_actually_move_motor) {
+			move_xy_slide_to_granular_relative_position($delta_x, $delta_y);
+		}
+		$old_x = $x;
+		$old_y = $y;
+	}
+}
+
+END {
+	info("the program's END block got called");
+	if ($should_actually_move_motor) {
+		restore_x_and_y_positions();
+	}
+}
+
