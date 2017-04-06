@@ -1,14 +1,15 @@
 # 2010-03-13 to 2010-03-17 mza @ uh idlab
+# 2012-04-05 to 2012-04-09 mza
 
 # motor 1 is the delay
 # motor 2 is the filter
-# motor 3 is the 
-# motor 4 is the 
+# motor 3 is the y stage
+# motor 4 is the x stage
 
 my $measured_number_of_steps_for_extent_of_delay_slide  = 61835;
 #my $measured_number_of_steps_for_extent_of_filter_slide = 21186;
-#my $measured_number_of_steps_for_extent_of_x_slide      = 10989;
-#my $measured_number_of_steps_for_extent_of_y_slide      = 10975;
+my $measured_number_of_steps_for_extent_of_x_slide      = 10989;
+my $measured_number_of_steps_for_extent_of_y_slide      = 10975;
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -17,7 +18,7 @@ our $VERSION = '1.00';
 use strict;
 use warnings;
 use base 'Exporter';
-our @EXPORT = qw(move_delay_slide_to_macrostep_position decrease_delay_slide_by_one_macrostep increase_delay_slide_by_one_macrostep current_delay_in_picoseconds current_delay_in_whole_picoseconds current_whole_macrostep_position_of_delay_slide bring_delay_slide_to_beginning delay_macrosteps_steps_and_picoseconds_from_macrosteps move_filter_slide_to_macrostep_position bring_filter_slide_to_beginning current_macrostep_position_of_filter_slide current_macrostep_position_of_delay_slide $delay_slide_granularity_in_picoseconds go_to_absolute_position_for_delay_slide move_delay_slide_to_this_delay_in_picoseconds absolute_macrosteps_to_absolute_picoseconds get_limits_of_motion move_xy_slide_to_granular_relative_position save_position_and_move_x_slide_out_of_way restore_position_of_x_slide move_xy_slide_to_granular_relative_position restore_x_and_y_positions get_all_original_motor_positions);
+our @EXPORT = qw(msleep move_delay_slide_to_macrostep_position decrease_delay_slide_by_one_macrostep increase_delay_slide_by_one_macrostep current_delay_in_picoseconds current_delay_in_whole_picoseconds current_whole_macrostep_position_of_delay_slide bring_delay_slide_to_beginning delay_macrosteps_steps_and_picoseconds_from_macrosteps move_filter_slide_to_macrostep_position bring_filter_slide_to_beginning current_macrostep_position_of_filter_slide current_macrostep_position_of_delay_slide $delay_slide_granularity_in_picoseconds go_to_absolute_position_for_delay_slide move_delay_slide_to_this_delay_in_picoseconds absolute_macrosteps_to_absolute_picoseconds get_limits_of_motion move_xy_slide_to_granular_relative_position save_position save_position_and_go_to_motor_endstops restore_position move_xy_slide_to_granular_relative_position restore_x_and_y_positions get_all_original_motor_positions setup_for_16channel_SL10 set_xy_small_step_size set_xy_anode_size set_xy_PMT_size move_NM_single_steps_in_xy move_NM_small_steps_in_xy move_NM_anodes_in_xy move_NM_PMTs_in_xy move_N_anodes_in_x_direction move_N_anodes_in_y_direction get_current_absolute_x_position get_current_absolute_y_position $number_of_millimeters_per_inch go_home call_this_home);
 
 use Device::SerialPort;
 use Time::HiRes qw(usleep);
@@ -29,8 +30,8 @@ use debug_info_warning_error;
 my $serial_device = "/dev/ttyUSB0";
 #my $serial_device = "/dev/ttyS0";
 
-#$debug_info_warning_error::verbosity = 2;
-$debug_info_warning_error::verbosity = 3;
+$debug_info_warning_error::verbosity = 2;
+#$debug_info_warning_error::verbosity = 3;
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -45,7 +46,7 @@ sub numeric_value {
 
 sub msleep {
 	my ($milliseconds) = @_;
-	debug2("waiting for " . $milliseconds . " ms...");
+	debug3("waiting for " . $milliseconds . " ms...");
 	my $microseconds = $milliseconds*1000;
 	usleep($microseconds);
 }
@@ -55,7 +56,7 @@ sub msleep {
 # preliminary calculations:
 my $number_of_steps_per_revolution = 200;
 my $number_of_threads_per_millimeter = 1;
-my $number_of_millimeters_per_inch = 25.4;
+our $number_of_millimeters_per_inch = 25.4;
 my $number_of_threads_per_inch = $number_of_millimeters_per_inch / $number_of_threads_per_millimeter;
 my $number_of_steps_per_millimeter = $number_of_steps_per_revolution;
 
@@ -116,6 +117,10 @@ my $number_of_steps_for_offset_of_delay_slide  = $number_of_steps_per_millimeter
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 my $number_of_steps_per_delay_slide_macrostep = $number_of_steps_per_picosecond * $delay_slide_granularity_in_picoseconds;
+my ($x_small_step_size, $y_small_step_size) = (1, 1);
+my ($x_anode_step_size, $y_anode_step_size) = (1, 1);
+my ($x_PMT_step_size, $y_PMT_step_size) = (1, 1);
+#my ($x_macrostep_size, $y_macrostep_size) = (1, 1);
 
  info(numeric_value(                     "number of threads per inch", $number_of_threads_per_inch));
  info(numeric_value(                 "number of steps per millimeter", $number_of_steps_per_millimeter));
@@ -138,9 +143,6 @@ if (!$should_actually_move_motors) {
 }
 print "\n";
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 sub open_communications_port {
@@ -563,57 +565,69 @@ sub move_filter_slide_to_macrostep_position {
 sub go_to_relative_position_for_xy_slide {
 	my ($delta_x, $delta_y) = @_;
 	if ($delta_x) {
+		info("moving x position by $delta_x steps...");
 		write_drive_command_to_motor_controller("CI4M" . int($delta_x) . ",R");
 		wait_until_motor_controller_is_ready();
-		show_current_position_of_x_slide();
+		#show_current_position_of_x_slide();
 	}
 	if ($delta_y) {
+		info("moving y position by $delta_y steps...");
 		write_drive_command_to_motor_controller("CI3M" . int($delta_y) . ",R");
 		wait_until_motor_controller_is_ready();
 	}
 }
 
-sub go_to_absolute_position_for_x_slide {
-	my ($x) = @_;
-	write_drive_command_to_motor_controller("CIA4M" . int($x) . ",R");
-	wait_until_motor_controller_is_ready();
-	show_current_position_of_x_slide();
-}
+#sub go_to_absolute_position_for_x_slide {
+#	my ($x) = @_;
+#	write_drive_command_to_motor_controller("CIA4M" . int($x) . ",R");
+#	wait_until_motor_controller_is_ready();
+#	show_current_position_of_x_slide();
+#}
 
 sub go_to_motor_side_stop_for_x_slide {
 	write_drive_command_to_motor_controller("CI4M-0,R");
 	wait_until_motor_controller_is_ready();
-	show_current_position_of_x_slide();
+#	show_current_position_of_x_slide();
 }
 
-sub move_xy_slide_to_granular_relative_position {
-	my ($delta_x, $delta_y) = @_;
-#	print "($delta_x, $delta_y)\n";
-#my $interstitial_distance_between_anodes_in_millimeters = 2.3;
-my $interstitial_distance_between_anodes_in_millimeters = 0.25; # adjust granular x-y spacing here!
-	$delta_x *= $interstitial_distance_between_anodes_in_millimeters * $number_of_steps_per_millimeter;
-	$delta_y *= $interstitial_distance_between_anodes_in_millimeters * $number_of_steps_per_millimeter;
-	$delta_x = - $delta_x;
-	$delta_y = - $delta_y;
-	go_to_relative_position_for_xy_slide($delta_x, $delta_y);
+sub go_to_motor_side_stop_for_y_slide {
+	write_drive_command_to_motor_controller("CI3M-0,R");
+	wait_until_motor_controller_is_ready();
 }
 
-my $saved_position_of_x_slide;
+my ($saved_position_of_x_slide, $saved_position_of_y_slide) = (0, 0);
 
-sub show_current_position_of_x_slide {
-	my $x = get_absolute_position_of_motor(4);
-	info("current position of x slide:  $x");
-}
-
-sub save_position_and_move_x_slide_out_of_way {
+sub save_position {
 	$saved_position_of_x_slide = get_absolute_position_of_motor(4);
-	info("saved position of x slide:  $saved_position_of_x_slide");
-	go_to_motor_side_stop_for_x_slide();
+	$saved_position_of_y_slide = get_absolute_position_of_motor(3);
+	info("saved position:  $saved_position_of_x_slide, $saved_position_of_y_slide");
 }
 
-sub restore_position_of_x_slide {
-	go_to_absolute_position_for_x_slide($saved_position_of_x_slide);
+sub save_position_and_go_to_motor_endstops {
+	save_position();
+	go_to_motor_side_stop_for_x_slide();
+	go_to_motor_side_stop_for_y_slide();
 }
+
+sub restore_position {
+	bring_motor_to_absolute_position(3, $saved_position_of_x_slide);
+	bring_motor_to_absolute_position(4, $saved_position_of_y_slide);
+}
+
+#sub show_current_position_of_x_slide {
+#	my $x = get_absolute_position_of_motor(4);
+#	info("current position of x slide:  $x");
+#}
+
+#sub save_position_and_move_x_slide_out_of_way {
+#	$saved_position_of_x_slide = get_absolute_position_of_motor(4);
+#	info("saved position of x slide:  $saved_position_of_x_slide");
+#	go_to_motor_side_stop_for_x_slide();
+#}
+
+#sub restore_position_of_x_slide {
+#	go_to_absolute_position_for_x_slide($saved_position_of_x_slide);
+#}
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -630,29 +644,30 @@ sub bring_motor_to_endstop_near_motor {
 	my ($motor_number) = @_;
 	write_drive_command_to_motor_controller(motor_command_to_go_to_endstop_near_motor($motor_number));
 	wait_until_motor_controller_is_ready();
-	show_current_position_of_x_slide();
+#	show_current_position_of_x_slide();
 }
 
 sub bring_motor_to_endstop_far_from_motor {
 	my ($motor_number) = @_;
 	write_drive_command_to_motor_controller(motor_command_to_go_to_endstop_far_from_motor($motor_number));
 	wait_until_motor_controller_is_ready();
-	show_current_position_of_x_slide();
+#	show_current_position_of_x_slide();
 }
 
 sub bring_motor_to_absolute_position {
 	my ($motor_number, $absolute_position) = @_;
+	info("moving motor $motor_number position to $absolute_position...");
 	write_drive_command_to_motor_controller(motor_command_to_go_to_absolute_position($motor_number, $absolute_position));
 	wait_until_motor_controller_is_ready();
-	show_current_position_of_x_slide();
+#	show_current_position_of_x_slide();
 }
 
 sub tell_motor_that_it_is_now_at_the_zero_position {
 	my ($motor_number) = @_;
-	show_current_position_of_x_slide();
+#	show_current_position_of_x_slide();
 	write_drive_command_to_motor_controller(motor_command_to_reset_the_zero($motor_number));
 	wait_until_motor_controller_is_ready();
-	show_current_position_of_x_slide();
+#	show_current_position_of_x_slide();
 }
 
 sub motor_command_to_go_to_endstop_near_motor {
@@ -679,9 +694,10 @@ sub motor_command_to_go_to_absolute_position {
 	my ($motor_number, $absolute_position) = @_;
 	my $string = "";
 	if (1 <= $motor_number && $motor_number <= 4) {
-		if ($absolute_position != 0 || $absolute_position != int($absolute_position)) {
+		#if ($absolute_position != 0 || $absolute_position != int($absolute_position)) {
+#		if ($absolute_position == int($absolute_position)) {
 			$string = "CIA" . $motor_number . "M" . $absolute_position . ",R";
-		}
+#		}
 	} else {
 	}
 	return $string;
@@ -737,8 +753,8 @@ sub show_all_original_motor_positions {
 }
 
 sub restore_x_and_y_positions {
-	bring_motor_to_absolute_position(3, $original_y_slide_position);
-	bring_motor_to_absolute_position(4, $original_x_slide_position);
+	bring_motor_to_absolute_position(3, $original_y_slide_position); # 3=y
+	bring_motor_to_absolute_position(4, $original_x_slide_position); # 4=x
 }
 
 sub save_all_positions_and_find_endstops_and_restore_positions {
@@ -752,6 +768,7 @@ sub save_all_positions_and_find_endstops_and_restore_positions {
 	#bring_motor_to_endstop_far_from_motor(2); # 2=
 	#bring_motor_to_endstop_far_from_motor(3); # 3=
 	bring_motor_to_endstop_near_motor(4); # 4=x
+	bring_motor_to_endstop_near_motor(3); # 3=y
 	$modified_delay_slide_position  = get_absolute_position_of_motor(1);
 	$modified_filter_slide_position = get_absolute_position_of_motor(2);
 	$modified_y_slide_position      = get_absolute_position_of_motor(3);
@@ -765,16 +782,129 @@ sub save_all_positions_and_find_endstops_and_restore_positions {
 	#write_drive_command_to_motor_controller("CI2M-0,R");
 	#write_drive_command_to_motor_controller("CI3M-0,R");
 	tell_motor_that_it_is_now_at_the_zero_position(4); # 4=x
+	tell_motor_that_it_is_now_at_the_zero_position(3); # 3=y
 	#go_to_absolute_position_for_delay_slide($original_delay_slide_position);
 	#go_to_absolute_position_for_filter_slide($original_filter_slide_position);
 	#go_to_absolute_position_for_y_slide($original_y_slide_position);
-	bring_motor_to_absolute_position(4, $original_x_slide_position);
+	bring_motor_to_absolute_position(4, $original_x_slide_position); # 4=x
+	bring_motor_to_absolute_position(3, $original_y_slide_position); # 3=y
 	#bring_motor_to_absolute_position(4, 4138);
+}
+
+sub save_xy_positions_and_find_endstops_and_restore_positions {
+	get_all_original_motor_positions();
+	show_all_original_motor_positions();
+	bring_motor_to_endstop_near_motor(4); # 4=x
+	bring_motor_to_endstop_near_motor(3); # 3=y
+	$modified_y_slide_position      = get_absolute_position_of_motor(3);
+	$modified_x_slide_position      = get_absolute_position_of_motor(4);
+	$original_x_slide_position      =  abs($original_x_slide_position      - $modified_x_slide_position);
+	$original_y_slide_position      =     ($original_y_slide_position      - $modified_y_slide_position);
+	show_all_original_motor_positions();
+	tell_motor_that_it_is_now_at_the_zero_position(4); # 4=x
+	tell_motor_that_it_is_now_at_the_zero_position(3); # 3=y
+	bring_motor_to_absolute_position(4, $original_x_slide_position); # 4=x
+	bring_motor_to_absolute_position(3, $original_y_slide_position); # 3=y
+}
+
+sub call_this_home {
+	my ($x, $y) = @_;
+	tell_motor_that_it_is_now_at_the_zero_position(4); # 4=x
+	tell_motor_that_it_is_now_at_the_zero_position(3); # 3=y
+}
+
+sub go_to_this_xy_position_and_call_that_home {
+	my ($x, $y) = @_;
+	save_xy_positions_and_find_endstops_and_restore_positions($x, $y);
+	tell_motor_that_it_is_now_at_the_zero_position(4); # 4=x
+	tell_motor_that_it_is_now_at_the_zero_position(3); # 3=y
+}
+
+sub go_home {
+	info("going to absolute position 0,0");
+	bring_motor_to_absolute_position(4, 0); # 4=x
+	bring_motor_to_absolute_position(3, 0); # 3=y
 }
 
 sub initialize_positions_by_resetting_them_all {
 	bring_filter_slide_to_beginning();
 	bring_delay_slide_to_beginning();
+}
+
+sub get_current_absolute_x_position {
+	return get_absolute_position_of_motor(4); # 4=x
+}
+
+sub get_current_absolute_y_position {
+	return get_absolute_position_of_motor(3); # 3=y
+}
+
+sub move_NM_single_steps_in_xy { my ($x, $y) = @_; if (defined $x && $x != 0) { move_N_single_steps_in_x_direction($x); } if (defined $y && $y != 0) { move_N_single_steps_in_y_direction($y); } }
+sub move_N_single_steps_in_x_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide($n, 0); } }
+sub move_N_single_steps_in_y_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide(0, $n); } }
+
+sub move_NM_small_steps_in_xy { my ($x, $y) = @_; if (defined $x && $x != 0) { move_N_small_steps_in_x_direction($x); } if (defined $y && $y != 0) { move_N_small_steps_in_y_direction($y); } }
+sub move_N_small_steps_in_x_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide($n * $x_small_step_size, 0); } }
+sub move_N_small_steps_in_y_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide(0, $n * $y_small_step_size); } }
+
+sub move_NM_anodes_in_xy { my ($x, $y) = @_; if (defined $x && $x != 0) { move_N_anodes_in_x_direction($x); } if (defined $y && $y != 0) { move_N_anodes_in_y_direction($y); } }
+sub move_N_anodes_in_x_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide($n * $x_anode_step_size, 0); } }
+sub move_N_anodes_in_y_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide(0, $n * $y_anode_step_size); } }
+
+sub move_NM_PMTs_in_xy { my ($x, $y) = @_; if (defined $x && $x != 0) { move_N_PMTs_in_x_direction($x); } if (defined $y && $y != 0) { move_N_PMTs_in_y_direction($y); } }
+sub move_N_PMTs_in_x_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide($n * $x_PMT_step_size, 0); } }
+sub move_N_PMTs_in_y_direction { my ($n) = @_; if (defined $n && $n != 0) { go_to_relative_position_for_xy_slide(0, $n * $y_PMT_step_size); } }
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+sub set_xy_small_step_size {
+	my ($x, $y) = @_;
+	if (defined $x && $x > 0 && $x < $measured_number_of_steps_for_extent_of_x_slide) {
+		$x_small_step_size = $x;
+		info("changing x small step size to " . $x_small_step_size);
+	}
+	if (defined $y && $y > 0 && $y < $measured_number_of_steps_for_extent_of_y_slide) {
+		$y_small_step_size = $y;
+		info("changing y small step size to " . $y_small_step_size);
+	}
+}
+
+sub set_xy_anode_size { # distance between anode centers
+	my ($x, $y) = @_;
+	if (defined $x && $x > 0 && $x < $measured_number_of_steps_for_extent_of_x_slide) {
+		$x_anode_step_size = $x;
+		info("changing x anode size to " . $x_anode_step_size);
+	}
+	if (defined $y && $y > 0 && $y < $measured_number_of_steps_for_extent_of_y_slide) {
+		$y_anode_step_size = $y;
+		info("changing y anode size to " . $y_anode_step_size);
+	}
+}
+
+sub set_xy_PMT_size {
+	my ($x, $y) = @_;
+	if (defined $x && $x > 0 && $x < $measured_number_of_steps_for_extent_of_x_slide) {
+		$x_PMT_step_size = $x;
+		info("changing x PMT step size to " . $x_PMT_step_size);
+	}
+	if (defined $y && $y > 0 && $y < $measured_number_of_steps_for_extent_of_y_slide) {
+		$y_PMT_step_size = $y;
+		info("changing y PMT step size to " . $y_PMT_step_size);
+	}
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+sub setup_for_16channel_SL10 {
+	my $number_of_mm_per_inch = 25.4;
+	my $distance_between_anodes_in_inches = 0.2; # from SL10 datasheet / front-front board design
+	my $distance_between_anodes_in_mm = $distance_between_anodes_in_inches * $number_of_mm_per_inch;
+	my $distance_between_anodes_in_steps = $distance_between_anodes_in_mm * $number_of_steps_per_millimeter;
+	set_xy_anode_size($distance_between_anodes_in_steps, $distance_between_anodes_in_steps);
+	my $distance_between_PMTs_in_mm = 28; # from front-front board design
+	my $distance_between_PMTs_in_steps = $distance_between_PMTs_in_mm * $number_of_steps_per_millimeter;
+	set_xy_PMT_size($distance_between_PMTs_in_steps, $distance_between_PMTs_in_steps);
+#	go_to_this_xy_position_and_call_that_home(2600, 5000);
 }
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -797,12 +927,16 @@ sub test {
 		info(absolute_macrosteps_to_absolute_steps(3));
 		print "\n";
 	}
-	if (1) {
+	if (0) {
 		info("current position of delay slide = " . current_position_of_delay_slide());
 		info("current macrostep postion of delay slide = " . current_macrostep_position_of_delay_slide());
 		#info("current delay = " . current_delay_in_whole_picoseconds() . " ps");
 		#info("current delay = " . current_delay_in_picoseconds() . " ps");
 		info("current delay = " . current_delay_in_picoseconds() . " ps ~ " . current_delay_in_whole_picoseconds() . " ps");
+	}
+	if (0) {
+		set_xy_microstep_size(45, 56);
+		set_xy_macrostep_size(452, 563);
 	}
 }
 
@@ -818,10 +952,12 @@ INIT {
 	#move_delay_slide_to_position(2);
 	#move_delay_slide_to_position(1);
 #	get_limits_of_motion(); exit(7);
-#	show_all_current_motor_positions();
-	#get_all_original_motor_positions();
+	get_all_original_motor_positions();
+	show_all_original_motor_positions();
 	#save_all_positions_and_find_endstops_and_restore_positions();
 	test();
+	set_xy_small_step_size(50, 50);
+	setup_for_16channel_SL10();
 }
 
 END {

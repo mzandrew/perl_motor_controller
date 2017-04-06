@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+
+# started 2010-04-15 by mza @ uh idlab
+# 2012-04-05 to 2012-04-09 mza
+
+use strict;
+use motor_controller;
+use debug_info_warning_error;
+save_position();
+my $should_actually_move_motor = 1;
+
+# the following functions are useful:
+# setup_for_16channel_SL10(); sets up anode pitch, PMT pitch and optionally blindly centers on the upper right corner anode of the upper right PMT
+# save_position(); saves position of motor when called.  Retrievable with:
+# restore_position(); (but only during the same run of the program; this is called in the END block, so it _should_ be automatic)
+# move_N_single_steps_in_x_direction(-4); # single step means a single motor step
+# move_N_small_steps_in_x_direction(+2); # small steps are 50 single steps
+# move_N_anodes_in_x_direction(+3); # moves in integral anode steps (1016 steps) - be sure to take care when crossing to another PMT
+# move_N_PMTs_in_x_direction(-1); # moves over one whole PMT (5600 steps)
+
+sub wait_for_keypress {
+	info("");
+	info("press enter to move to next position.");
+	info("type \"q\" then press enter to quit scan and return motor slides to original positions.");
+	my $line = <STDIN>;
+	chomp($line);
+	die if ($line =~ /q/);
+}
+
+END {
+	info("the program's END block got called");
+	if ($should_actually_move_motor) {
+		restore_position();
+	}
+}
+
+sub run_loop {
+	my ($Nx, $Ny) = (3, 3);
+	for (my $i=0; $i<$Nx; $i++) {
+		for (my $j=0; $j<$Ny; $j++) {
+			if ($should_actually_move_motor) {
+				move_N_anodes_in_y_direction(-1);
+			}
+			msleep(250);
+			# wait_for_keypress();
+			call_external_function();
+		}
+		if ($should_actually_move_motor) {
+			move_N_anodes_in_x_direction(+1);
+#			move_N_anodes_in_y_direction(-$Ny);
+		}
+	}
+}
+
+sub call_external_function {
+	info("doing something here...");
+}
+
+setup_for_16channel_SL10();
+run_loop();
+

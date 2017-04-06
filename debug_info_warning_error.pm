@@ -1,10 +1,12 @@
+# 2010-03-13 to 2010-03-17 mza @ uh idlab
+# 2012-04-05 to 2012-04-09 mza
 
 package debug_info_warning_error;
 our $VERSION = '1.00';
 use strict;
 use warnings;
 use base 'Exporter';
-our @EXPORT = qw(debug debug2 info warning error);
+our @EXPORT = qw(debug debug2 debug3 info warning error);
 
 our $verbosity = 1;
 
@@ -26,6 +28,13 @@ sub debug2 {
 	my ($message) = @_;
 	if ($verbosity >= 3) {
 		print " DEBUG2: " . $message . "\n";
+	}
+}
+
+sub debug3 {
+	my ($message) = @_;
+	if ($verbosity >= 4) {
+		print " DEBUG3: " . $message . "\n";
 	}
 }
 

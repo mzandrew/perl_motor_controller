@@ -1,0 +1,1 @@
+perl -MCPAN -e "install Device::SerialPort"

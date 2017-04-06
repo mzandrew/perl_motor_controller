@@ -1,0 +1,14 @@
+
+# the old way:
+sub move_xy_slide_to_granular_relative_position {
+	my ($delta_x, $delta_y) = @_;
+#	print "($delta_x, $delta_y)\n";
+#my $interstitial_distance_between_anodes_in_millimeters = 2.3;
+my $interstitial_distance_between_anodes_in_millimeters = 0.25; # adjust granular x-y spacing here!
+	$delta_x *= $interstitial_distance_between_anodes_in_millimeters * $number_of_steps_per_millimeter;
+	$delta_y *= $interstitial_distance_between_anodes_in_millimeters * $number_of_steps_per_millimeter;
+	$delta_x = - $delta_x;
+	$delta_y = - $delta_y;
+	go_to_relative_position_for_xy_slide($delta_x, $delta_y);
+}
+
