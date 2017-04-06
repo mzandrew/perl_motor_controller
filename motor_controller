@@ -58,11 +58,11 @@ sub setup_main_window {
 	if ($should_draw_filter_slide_frame) {
 		$filter_slide_frame  = $window->Frame(-borderwidth=>15, -background=>$filter_slide_frame_background_color);
 		$radiobutton_filter_label = $filter_slide_frame->Label(-text=>"filter slide:", -background=>$filter_slide_frame_background_color);
-		$radiobutton_filter_none  = $filter_slide_frame->Radiobutton(-text=>"none",  -value=>0, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
-		$radiobutton_filter_one   = $filter_slide_frame->Radiobutton(-text=>"one",   -value=>1, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
-		$radiobutton_filter_two   = $filter_slide_frame->Radiobutton(-text=>"two",   -value=>2, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
-		$radiobutton_filter_three = $filter_slide_frame->Radiobutton(-text=>"three", -value=>3, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
-		$radiobutton_filter_four  = $filter_slide_frame->Radiobutton(-text=>"four",  -value=>4, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
+		$radiobutton_filter_none  = $filter_slide_frame->Radiobutton(-text=>"100%",  -value=>0, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
+		$radiobutton_filter_one   = $filter_slide_frame->Radiobutton(-text=>"10%",   -value=>1, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
+		$radiobutton_filter_two   = $filter_slide_frame->Radiobutton(-text=>"1%",   -value=>2, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
+		$radiobutton_filter_three = $filter_slide_frame->Radiobutton(-text=>"0.1%", -value=>3, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
+		$radiobutton_filter_four  = $filter_slide_frame->Radiobutton(-text=>"0.01%",  -value=>4, -variable=>\$displayed_filter_slide_macrostep_position, -command=>\&filter_slide_radiobutton_clicked, -background=>$filter_slide_frame_background_color);
 		$radiobutton_filter_label->grid(-row=>0, -column=>0);
 		$radiobutton_filter_none->grid (-row=>1, -column=>0);
 		$radiobutton_filter_one->grid  (-row=>2, -column=>0);
@@ -112,8 +112,8 @@ sub setup_main_window {
 		my $frame_xy_slide_grid_restore_position_button  = $frame_xy_slide_grid->Button(-text=>"restore x position",  -command=>\&restore_position_of_x_slide, -background=>$frame_xy_slide_grid_background_color);
 		$frame_xy_slide_grid_get_out_of_way_button->grid   (-row=>1, -column=>0);
 		$frame_xy_slide_grid_restore_position_button->grid (-row=>2, -column=>0);
-		my $frame_xy_slide_grid_left_button  = $frame_xy_slide_grid->Button(-text=>"left",  -command=>[\&move_xy_slide, -1,  0], -background=>$frame_xy_slide_grid_background_color);
-		my $frame_xy_slide_grid_right_button = $frame_xy_slide_grid->Button(-text=>"right", -command=>[\&move_xy_slide, +1,  0], -background=>$frame_xy_slide_grid_background_color);
+		my $frame_xy_slide_grid_right_button  = $frame_xy_slide_grid->Button(-text=>"right", -command=>[\&move_xy_slide, -1,  0], -background=>$frame_xy_slide_grid_background_color);
+		my $frame_xy_slide_grid_left_button = $frame_xy_slide_grid->Button(-text=>"left",  -command=>[\&move_xy_slide, +1,  0], -background=>$frame_xy_slide_grid_background_color);
 		my $frame_xy_slide_grid_up_button    = $frame_xy_slide_grid->Button(-text=>"up",    -command=>[\&move_xy_slide,  0, +1], -background=>$frame_xy_slide_grid_background_color);
 		my $frame_xy_slide_grid_down_button  = $frame_xy_slide_grid->Button(-text=>"down",  -command=>[\&move_xy_slide,  0, -1], -background=>$frame_xy_slide_grid_background_color);
 		$frame_xy_slide_grid_left_button->grid (-row=>1, -column=>3+0);

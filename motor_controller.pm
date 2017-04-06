@@ -29,8 +29,8 @@ use debug_info_warning_error;
 my $serial_device = "/dev/ttyUSB0";
 #my $serial_device = "/dev/ttyS0";
 
-$debug_info_warning_error::verbosity = 2;
-#$debug_info_warning_error::verbosity = 3;
+#$debug_info_warning_error::verbosity = 2;
+$debug_info_warning_error::verbosity = 3;
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -589,7 +589,8 @@ sub go_to_motor_side_stop_for_x_slide {
 sub move_xy_slide_to_granular_relative_position {
 	my ($delta_x, $delta_y) = @_;
 #	print "($delta_x, $delta_y)\n";
-my $interstitial_distance_between_anodes_in_millimeters = 2.3;
+#my $interstitial_distance_between_anodes_in_millimeters = 2.3;
+my $interstitial_distance_between_anodes_in_millimeters = 0.25; # adjust granular x-y spacing here!
 	$delta_x *= $interstitial_distance_between_anodes_in_millimeters * $number_of_steps_per_millimeter;
 	$delta_y *= $interstitial_distance_between_anodes_in_millimeters * $number_of_steps_per_millimeter;
 	$delta_x = - $delta_x;
