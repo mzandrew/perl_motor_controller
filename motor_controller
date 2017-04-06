@@ -2,6 +2,8 @@
 
 # 2010-03-13 to 2010-03-17 mza @ uh idlab
 # 2012-04-05 to 2012-04-09 mza
+# 2013-06-18 to ?? mza (updated to exchange 2" and 4" slides)
+
 
 use strict;
 #BEGIN {
@@ -150,8 +152,8 @@ sub setup_main_window {
 		my $call_this_home_button = $frame_xy_slide_grid->Button(-text=>"call current position 0,0",  -command=>\&call_this_home_and_update_display, -background=>$frame_xy_slide_grid_background_color, -padx=>$padx, -pady=>$pady);
  
 #		my $frame_xy_slide_grid_restore_position_button = $frame_xy_slide_grid->Button(-text=>"restore x position",  -command=>\&restore_position_of_x_slide_and_update_display, -background=>$frame_xy_slide_grid_background_color);
-#		my $frame_xy_slide_grid_right_button = $frame_xy_slide_grid->Button(-text=>"right", -command=>[\&move_xy_slide, -1,  0], -background=>$frame_xy_slide_grid_background_color);
-#		my $frame_xy_slide_grid_left_button  = $frame_xy_slide_grid->Button(-text=>"left",  -command=>[\&move_xy_slide, +1,  0], -background=>$frame_xy_slide_grid_background_color);
+#		my $frame_xy_slide_grid_right_button = $frame_xy_slide_grid->Button(-text=>"right", -command=>[\&move_xy_slide, +1,  0], -background=>$frame_xy_slide_grid_background_color);
+#		my $frame_xy_slide_grid_left_button  = $frame_xy_slide_grid->Button(-text=>"left",  -command=>[\&move_xy_slide, -1,  0], -background=>$frame_xy_slide_grid_background_color);
 #		my $frame_xy_slide_grid_up_button    = $frame_xy_slide_grid->Button(-text=>"up",    -command=>[\&move_xy_slide,  0, +1], -background=>$frame_xy_slide_grid_background_color);
 #		my $frame_xy_slide_grid_down_button  = $frame_xy_slide_grid->Button(-text=>"down",  -command=>[\&move_xy_slide,  0, -1], -background=>$frame_xy_slide_grid_background_color);
 		my $go_home_button = $frame_xy_slide_grid->Button(-text=>"go to 0,0",  -command=>\&go_home_and_update_display, -background=>$frame_xy_slide_grid_background_color, -padx=>$padx, -pady=>$pady);
@@ -184,20 +186,20 @@ sub setup_main_window {
 		$xy_frame_small_step_label  = $xy_frame_small_step->Label(-text=>"small step");
 		$xy_frame_anode_step_label  = $xy_frame_anode_step->Label(-text=>"anode");
 		$xy_frame_PMT_step_label    = $xy_frame_PMT_step->Label(-text=>"PMT");
-		my $xy_frame_single_step_right_button = $xy_frame_single_step->Button(-text=>"right", -command=>[\&move_NM_single_steps_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_single_step_left_button  = $xy_frame_single_step->Button(-text=>"left",  -command=>[\&move_NM_single_steps_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_single_step_right_button = $xy_frame_single_step->Button(-text=>"right", -command=>[\&move_NM_single_steps_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_single_step_left_button  = $xy_frame_single_step->Button(-text=>"left",  -command=>[\&move_NM_single_steps_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_single_step_up_button    = $xy_frame_single_step->Button(-text=>"up",    -command=>[\&move_NM_single_steps_in_xy_and_update_display,  0, -1], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_single_step_down_button  = $xy_frame_single_step->Button(-text=>"down",  -command=>[\&move_NM_single_steps_in_xy_and_update_display,  0, +1], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_small_step_right_button = $xy_frame_small_step->Button(-text=>"right", -command=>[\&move_NM_small_steps_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_small_step_left_button  = $xy_frame_small_step->Button(-text=>"left",  -command=>[\&move_NM_small_steps_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_small_step_right_button = $xy_frame_small_step->Button(-text=>"right", -command=>[\&move_NM_small_steps_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_small_step_left_button  = $xy_frame_small_step->Button(-text=>"left",  -command=>[\&move_NM_small_steps_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_small_step_up_button    = $xy_frame_small_step->Button(-text=>"up",    -command=>[\&move_NM_small_steps_in_xy_and_update_display,  0, -1], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_small_step_down_button  = $xy_frame_small_step->Button(-text=>"down",  -command=>[\&move_NM_small_steps_in_xy_and_update_display,  0, +1], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_anode_step_right_button = $xy_frame_anode_step->Button(-text=>"right", -command=>[\&move_NM_anodes_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_anode_step_left_button  = $xy_frame_anode_step->Button(-text=>"left",  -command=>[\&move_NM_anodes_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_anode_step_right_button = $xy_frame_anode_step->Button(-text=>"right", -command=>[\&move_NM_anodes_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_anode_step_left_button  = $xy_frame_anode_step->Button(-text=>"left",  -command=>[\&move_NM_anodes_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_anode_step_up_button    = $xy_frame_anode_step->Button(-text=>"up",    -command=>[\&move_NM_anodes_in_xy_and_update_display,  0, -1], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_anode_step_down_button  = $xy_frame_anode_step->Button(-text=>"down",  -command=>[\&move_NM_anodes_in_xy_and_update_display,  0, +1], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_PMT_step_right_button = $xy_frame_PMT_step->Button(-text=>"right", -command=>[\&move_NM_PMTs_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
-		my $xy_frame_PMT_step_left_button  = $xy_frame_PMT_step->Button(-text=>"left",  -command=>[\&move_NM_PMTs_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_PMT_step_right_button = $xy_frame_PMT_step->Button(-text=>"right", -command=>[\&move_NM_PMTs_in_xy_and_update_display, -1,  0], -padx=>$padx, -pady=>$pady);
+		my $xy_frame_PMT_step_left_button  = $xy_frame_PMT_step->Button(-text=>"left",  -command=>[\&move_NM_PMTs_in_xy_and_update_display, +1,  0], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_PMT_step_up_button    = $xy_frame_PMT_step->Button(-text=>"up",    -command=>[\&move_NM_PMTs_in_xy_and_update_display,  0, -1], -padx=>$padx, -pady=>$pady);
 		my $xy_frame_PMT_step_down_button  = $xy_frame_PMT_step->Button(-text=>"down",  -command=>[\&move_NM_PMTs_in_xy_and_update_display,  0, +1], -padx=>$padx, -pady=>$pady);
 
@@ -366,12 +368,12 @@ sub filter_slide_radiobutton_clicked {
 #filter_macrosteps_and_steps_from_macrosteps(current_macrostep_position_of_filter_slide())
 #	print "$displayed_filter_macrostep_slide_position, $current_filter_slide_macrostep_position\n";
 	if ($displayed_filter_slide_macrostep_position != current_macrostep_position_of_filter_slide()) {
-		if ($displayed_filter_slide_macrostep_position == 0) {
+		#if ($displayed_filter_slide_macrostep_position == 0) {
 #			move_filter_slide_to_macrostep_position($displayed_filter_slide_macrostep_position);
-			bring_filter_slide_to_beginning();
-		} else {
+		#	bring_filter_slide_to_beginning();
+		#} else {
 			move_filter_slide_to_macrostep_position($displayed_filter_slide_macrostep_position);
-		}
+		#}
 	}
 }
 
@@ -421,4 +423,6 @@ $displayed_filter_slide_macrostep_position = current_macrostep_position_of_filte
 #my $timer_callback = Tk::After->new($window, $timeout_in_milliseconds, 'repeat', \&every_once_in_a_while);
 
 MainLoop;
+#bring_filter_slide_to_beginning();
+#current_position_of_filter_slide();
 

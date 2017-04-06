@@ -1,5 +1,6 @@
 # 2010-03-13 to 2010-03-17 mza @ uh idlab
 # 2012-04-05 to 2012-04-09 mza
+# 2013-06-18 to ?? mza (updated to exchange 2" and 4" slides)
 
 # motor 1 is the delay
 # motor 2 is the filter
@@ -7,8 +8,8 @@
 # motor 4 is the x stage
 
 my $measured_number_of_steps_for_extent_of_delay_slide  = 61835;
-#my $measured_number_of_steps_for_extent_of_filter_slide = 21186;
-my $measured_number_of_steps_for_extent_of_x_slide      = 10989;
+#my $measured_number_of_steps_for_extent_of_filter_slide = 10989;
+my $measured_number_of_steps_for_extent_of_x_slide      = 21186;
 my $measured_number_of_steps_for_extent_of_y_slide      = 10975;
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -550,7 +551,7 @@ sub move_filter_slide_to_macrostep_position {
 		info(numeric_value("moving filter slide to new macrostep position", filter_macrosteps_and_steps_from_macrosteps($new_macrostep_position)));
 		#my $new_absolute_position = - int($number_of_steps_for_offset_of_filter_slide + ($new_macrostep_position) * $number_of_steps_between_filter_slide_positions);
 		my $new_absolute_position = - int(filter_absolute_steps_from_absolute_macrosteps($new_macrostep_position));
-		go_to_absolute_position_for_filter_slide($new_absolute_position);
+		go_to_absolute_position_for_filter_slide($new_absolute_position-2031);
 #		$current_filter_slide_macrostep_position = $new_macrostep_position;
 	} else {
 		error("illegal filter slide position");
