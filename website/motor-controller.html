@@ -1,0 +1,87 @@
+<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<title>motor controller for PiLas / SL10 characterization</title>
+</head>
+<body>
+	<h1>motor controller for PiLas / SL10 characterization</h1>
+<!--	<p><img src="motor_controller.png" width=654 height=194>-->
+	<p><img src="2012-04-09.pilas-motor-controller.png" width=956 height=955>
+	<p>The GUI uses Perl/Tk, which is a graphical layer on top of Perl.
+	The laptop (pilas-laptop) runs the motor control script remotely (through X11 forwarding) on the rackmount cPCI crate (idlkosmic).
+
+	<h2>Installation instructions for development<h2>
+<!--
+<pre>
+	perl -MCPAN -e "install Bundle::CPAN"
+which asks you to install the a bunch of prerequisites, which you can have it do automatically by hitting enter (you gotta hit enter a bunch of times for a bunch of random prompts).
+	After a while, it halts and hitting ctrl-c at that point prints the following:
+t/11mirroredby.t ....... ok
+t/12cpan.t ............. ok
+t/13tarzip.t ........... ok
+t/14forkbomb.t ......... skipped: test only run when called with -doit
+t/30shell.t ............ 206/238 make: *** [test_dynamic] Interrupt
+  /usr/bin/make test - NOT OK
+Running make install
+  make test had returned bad status, won't install without force
+
+	perl -MCPAN -e "install Tk"
+</pre>
+-->
+
+<h4>on idlkosmic:</h4>
+<p>
+<ul>
+	<li>start with <pre>apt-get update</pre>
+	<li>do <pre>sudo apt-get install perl-tk libdevice-serialport-perl vim-gtk openssh-server</pre>
+	<li>add the line <pre>KERNEL=="ttyUSB[0-9]", MODE="0666", GROUP="root"</pre> to the file <pre>/etc/udev/rules.d/idlab.rules</pre>
+	<li>run the command <pre>udevadm control --reload-rules</pre>
+	<li>unplug and then replug the usb/serial dongle
+	<li><pre>useradd --create-home your_desired_username</pre>
+	<li><pre>cp -ar /source/of/motor_controller_script /home/your_desired_username/motor</pre>
+	<li><pre>chown your_desired_username:your_desired_username /home/your_desired_username/motor -R</pre>
+	<li>while logged in as your_desired_username, do the following:
+	<ul>
+		<li><pre>passwd</pre> to change your password
+		<li><pre>ssh-keygen</pre> to create a public/private key pair
+		<li><pre>scp .ssh/id_rsa.pub pilas-laptop:.ssh/authorized_keys</pre> (because ssh-copy-id doesn't work from the debian install on idlkosmic)
+	</ul>
+</ul>
+<!--
+Note that ubuntu doesn't need this step:
+it makes the <pre>/dev/ttyUSB0</pre> device belong to group dialout and dialout is a group that each administrative user is by default.
+(If in doubt, do <pre>sudo adduser user_name dialout</pre> with user_name replaced by the user name)
+-->
+
+<h4>on pilas-laptop:</h4>
+<p>
+<ul>
+	<li>install debian linux 5 (ubuntu 9.10, vectorlinux 6.0 and damn small linux 4.4.10 were all tried and did not work on this laptop)
+	<!--<li>sudo apt-get install openssh-server-->
+	<li>as super-user (run <pre>su</pre>) to become super-user:
+		<ul>
+			<li>remove or comment out the line<pre>deb cdrom:[Debian GNU/Linux 5.0.3 _Lenny_ - Official i386 CD Binary-1 20090905-08:23]/ lenny main</pre> in the file <pre>/etc/apt/sources.list</pre> with your favorite text editor
+			<li><pre>apt-get update</pre>
+			<li><pre>apt-get install openssh-server</pre>
+		</ul>
+	<li><pre>useradd --create-home your_desired_username</pre>
+	<li>while logged in as your_desired_username, do the following:
+	<ul>
+		<li><pre>passwd</pre> to change your password
+		<li><pre>ssh-keygen</pre> to create a public/private key pair
+		<li><pre>ssh-copy-id pilas-laptop</pre>
+	</ul>
+	<li>do the following to add a button to launch the motor controller:
+		<ul>
+			<li>right-click on the panel at the top of the screen and choose "add to panel"
+			<li>choose "create a custom application launcher" and then give it the following properties:
+			<ul>
+				<li>name="motor-controller"
+				<li>command="ssh -Y idlkosmic ./build/motor/motor_controller"
+			</ul>
+		</ul>
+</ul>
+
+</body>
+</html>
+
