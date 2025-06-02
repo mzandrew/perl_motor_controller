@@ -1,6 +1,7 @@
 # 2010-03-13 to 2010-03-17 mza @ uh idlab
 # 2012-04-05 to 2012-04-09 mza
 # 2013-06-18 to ?? mza (updated to exchange 2" and 4" slides)
+# last updated 2025-06-02 by mza
 
 # motor 1 is the delay
 # motor 2 is the filter
@@ -28,7 +29,8 @@ use Time::HiRes qw(usleep);
 #use lib '/home/mza/build/motor';
 use debug_info_warning_error;
 
-my $serial_device = "/dev/ttyUSB0";
+my $serial_device = "/dev/ttyUSB1";
+#my $serial_device = "/dev/ttyUSB0";
 #my $serial_device = "/dev/ttyS0";
 
 $debug_info_warning_error::verbosity = 2;
@@ -899,9 +901,10 @@ sub set_xy_PMT_size {
 sub setup_for_16channel_SL10 {
 	my $number_of_mm_per_inch = 25.4;
 	my $distance_between_anodes_in_inches = 0.2; # from SL10 datasheet / front-front board design
-	my $distance_between_anodes_in_mm = $distance_between_anodes_in_inches * $number_of_mm_per_inch;
+	#my $distance_between_anodes_in_mm = $distance_between_anodes_in_inches * $number_of_mm_per_inch;
+	my $distance_between_anodes_in_mm = 7;
 	my $distance_between_anodes_in_steps = $distance_between_anodes_in_mm * $number_of_steps_per_millimeter;
-	set_xy_anode_size($distance_between_anodes_in_steps, $distance_between_anodes_in_steps);
+	set_xy_anode_size(2*$distance_between_anodes_in_steps, $distance_between_anodes_in_steps);
 	my $distance_between_PMTs_in_mm = 28; # from front-front board design
 	my $distance_between_PMTs_in_steps = $distance_between_PMTs_in_mm * $number_of_steps_per_millimeter;
 	set_xy_PMT_size($distance_between_PMTs_in_steps, $distance_between_PMTs_in_steps);

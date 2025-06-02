@@ -1,11 +1,12 @@
 # 2012-05-09 mza
+# last updated 2025-06-02 by mza
 
 package parse_config_file;
 our $VERSION = '1.00';
 use strict;
 use warnings;
 use base 'Exporter';
-use lib '/home/pilas/build/motor';
+use lib '/home/mza/build/perl_motor_controller';
 use debug_info_warning_error;
 our @EXPORT = qw(parse_config_file write_config_file @filter);
 

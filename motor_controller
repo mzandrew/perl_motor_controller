@@ -3,7 +3,7 @@
 # 2010-03-13 to 2010-03-17 mza @ uh idlab
 # 2012-04-05 to 2012-04-09 mza
 # 2013-06-18 to ?? mza (updated to exchange 2" and 4" slides)
-
+# last updated 2025-06-02 by mza
 
 use strict;
 #BEGIN {
@@ -16,13 +16,15 @@ use strict;
 use Tk;
 use Tk::PNG;
 use Tk::Photo;
-use lib '/home/pilas/build/motor';
+use lib '/home/mza/build/perl_motor_controller';
 use motor_controller;
 use debug_info_warning_error;
 use parse_config_file;
 
 #my $gui_has_been_instantiated = 0;
 
+#my $image_filename = "SL10s-on-front-front-board.png";
+my $image_filename = "7mm-SiPM-array.png";
 my $displayed_delay_in_picoseconds            = 0; # 0 to 1000
 my $displayed_delay_in_picoseconds_scale      = 0; # 0 to 1000
 #my $displayed_delay_slide_macrostep_position  = 0; # 0 to 20
@@ -43,13 +45,15 @@ my ($should_draw_filter_slide_frame, $should_draw_delay_slide_frame, $should_dra
 
 my $width_of_image_in_pixels = 878;
 my $height_of_image_in_pixels = 535;
-my $offset_x_from_image00_to_screen00_in_pixels = 48;
-my $offset_y_from_image00_to_screen00_in_pixels = 140;
+#my $offset_x_from_image00_to_screen00_in_pixels = 48; # SL10s
+#my $offset_y_from_image00_to_screen00_in_pixels = 140; # SL10s
+my $offset_x_from_image00_to_screen00_in_pixels = 26; # sipmt board
+my $offset_y_from_image00_to_screen00_in_pixels = 117; # sipmt board
 my $image_dots_per_inch = 200;
 my $image_dots_per_mm = $image_dots_per_inch / $number_of_millimeters_per_inch;
 my $spot_width = 8;
 my $spot_height = $spot_width;
-my $scale_x_from_motor_to_screen_coordinates = 200 / $image_dots_per_mm;
+my $scale_x_from_motor_to_screen_coordinates = -400 / $image_dots_per_mm;
 my $scale_y_from_motor_to_screen_coordinates = 200 / $image_dots_per_mm;
 my $offset_x_from_motor00_to_screen00_in_pixels = $width_of_image_in_pixels  - $offset_x_from_image00_to_screen00_in_pixels;
 my $offset_y_from_motor00_to_screen00_in_pixels =                            + $offset_y_from_image00_to_screen00_in_pixels;
@@ -160,7 +164,7 @@ sub setup_main_window {
 #		if (1) {
 			info("image dots per mm = " . $image_dots_per_mm);
 			$frame_canvas = $frame_xy_slide_grid->Canvas(-width=>$width_of_image_in_pixels, -height=>$height_of_image_in_pixels);
-			my $image = $frame_canvas->Photo(-format=>"png", -file => "SL10s-on-front-front-board.png", -width=>$width_of_image_in_pixels, -height=>$height_of_image_in_pixels);
+			my $image = $frame_canvas->Photo(-format=>"png", -file => $image_filename, -width=>$width_of_image_in_pixels, -height=>$height_of_image_in_pixels);
 			$frame_canvas->create('image', 0, 0, '-anchor' => 'nw', '-image' => $image);
 #			$frame_canvas->Tk::bind('<ButtonRelease-1>', \&grid_button_release);
 #			plot_spot();
